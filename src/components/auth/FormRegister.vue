@@ -1,5 +1,5 @@
 <template>
   <div>
-    OI
+    NAO IMPLEMENTADO AINDA
   </div>
 </template>

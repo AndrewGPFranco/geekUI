@@ -9,6 +9,7 @@
     <n-form ref="formRef" :model="formData" class="form-content">
       <n-form-item label="Email" path="email">
         <n-input
+          data-testid="Email"
           v-model:value="formData.email"
           type="text"
           placeholder="seu@email.com"
@@ -22,12 +23,14 @@
 
       <n-form-item label="Senha" path="senha">
         <n-input
+          data-testid="Senha"
           v-model:value="formData.senha"
           :type="isExibindoSenha ? 'text' : 'password'"
           placeholder="••••••••"
           size="large"
           :disabled="isLoading"
           class="custom-input"
+          @keyup="handleLogin"
         >
           <template #suffix>
             <n-button
