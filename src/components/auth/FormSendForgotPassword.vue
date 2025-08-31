@@ -66,7 +66,6 @@ const router = useRouter()
 const message = useMessage()
 const formRef = ref(null)
 
-// Estado reativo
 const formData = reactive({
   email: ''
 })
@@ -74,21 +73,17 @@ const formData = reactive({
 const isLoading = ref(false)
 const isEmailValid = ref(false)
 
-// Computed para status do email
 const emailStatus = computed(() => {
   if (formData.email === '') return undefined
   return isEmailValid.value ? 'success' : 'error'
 })
 
-// Instância do serviço
 const authService = new AuthService()
 
-// Watchers
 watch(() => formData.email, (newEmail) => {
   validateEmail(newEmail)
 })
 
-// Métodos
 const validateEmail = (email: string) => {
   isEmailValid.value = ValidationUtils.validEmailWithRegex(email || formData.email)
 }
@@ -114,10 +109,9 @@ const handleSubmit = async () => {
     message.success(responseAPI.getResponse() as string)
     isLoading.value = false
 
-    // Redirecionar para login após sucesso
     await router.push('/auth/login')
   } catch (error) {
-    console.error(error);
+    console.error(error)
     message.error('Erro interno do sistema')
     isLoading.value = false
   }

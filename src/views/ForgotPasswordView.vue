@@ -3,7 +3,6 @@
     <div class="content-wrapper">
       <FormSendForgotPassword />
 
-      <!-- Background decorative elements -->
       <div class="bg-decoration">
         <div class="bg-circle bg-circle-top"></div>
         <div class="bg-circle bg-circle-bottom"></div>
@@ -14,19 +13,6 @@
 
 <script setup lang="ts">
 import FormSendForgotPassword from '@/components/auth/FormSendForgotPassword.vue'
-
-// Definir metadados para SEO (equivalente ao metadata do Next.js)
-defineOptions({
-  name: 'ForgotPasswordPage'
-})
-
-// Se estiver usando vue-meta ou similar para SEO
-// useMeta({
-//   title: 'Geek - Esqueci a Senha',
-//   meta: [
-//     { name: 'description', content: 'Solicite o link para alteração da senha' }
-//   ]
-// })
 </script>
 
 <style scoped>

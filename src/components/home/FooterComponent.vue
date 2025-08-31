@@ -95,7 +95,6 @@
   text-align: center;
 }
 
-/* Responsividade simples */
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;

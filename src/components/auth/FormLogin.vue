@@ -78,7 +78,6 @@ const router = useRouter()
 const message = useMessage()
 const formRef = ref(null)
 
-// Estado reativo
 const formData = reactive({
   email: '',
   senha: ''
@@ -88,21 +87,17 @@ const isLoading = ref(false)
 const isEmailValid = ref(false)
 const isExibindoSenha = ref(false)
 
-// Computed para status do email
 const emailStatus = computed(() => {
   if (formData.email === '') return undefined
   return isEmailValid.value ? 'success' : 'error'
 })
 
-// Instância do serviço
 const authService = new AuthService()
 
-// Watchers
 watch(() => formData.email, (newEmail) => {
   validateEmail(newEmail)
 })
 
-// Métodos
 const validateEmail = (email: string) => {
   isEmailValid.value = ValidationUtils.validEmailWithRegex(email || formData.email)
 }
@@ -136,7 +131,6 @@ const handleLogin = async () => {
       return
     }
 
-    // Redirecionar para home em caso de sucesso
     await router.push('/')
   } catch (error) {
     console.error(error)
@@ -172,12 +166,6 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-}
-
-.icon {
-  width: 2rem;
-  height: 2rem;
-  color: white;
 }
 
 .form-content {
@@ -249,7 +237,6 @@ const handleLogin = async () => {
   cursor: not-allowed !important;
 }
 
-/* Labels customizadas */
 :deep(.n-form-item-label) {
   font-size: 0.875rem !important;
   font-weight: 500 !important;

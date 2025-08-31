@@ -5,9 +5,9 @@
         <h1 class="title">Bem-vindo de volta!</h1>
         <p class="subtitle">Faça login para acessar sua conta</p>
       </div>
-      
+
       <FormLogin />
-      
+
       <div class="footer-section">
         <n-text depth="3" class="footer-text">
           Não tem uma conta?
@@ -17,8 +17,7 @@
         </n-text>
       </div>
     </div>
-    
-    <!-- Background decorative elements -->
+
     <div class="bg-decoration">
       <div class="bg-circle bg-circle-top"></div>
       <div class="bg-circle bg-circle-bottom"></div>
@@ -29,19 +28,6 @@
 <script setup lang="ts">
 import { NText } from 'naive-ui'
 import FormLogin from '../components/auth/FormLogin.vue'
-
-// Definir metadados para SEO (equivalente ao metadata do Next.js)
-defineOptions({
-  name: 'LoginPage'
-})
-
-// Se estiver usando vue-meta ou similar para SEO
-// useMeta({
-//   title: 'Geek - Login',
-//   meta: [
-//     { name: 'description', content: 'Faça login para acessar sua conta' }
-//   ]
-// })
 </script>
 
 <style scoped>
@@ -135,7 +121,7 @@ defineOptions({
   .title {
     font-size: 1.5rem;
   }
-  
+
   .bg-circle {
     width: 16rem;
     height: 16rem;

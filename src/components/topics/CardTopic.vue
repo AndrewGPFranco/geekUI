@@ -7,7 +7,6 @@
     <n-card
       class="w-full bg-gradient-to-br from-gray-600 to-gray-700 border border-gray-400/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 backdrop-blur-sm hover:scale-[1.02] p-0"
     >
-      <!-- Header com imagem -->
       <div class="rounded-2xl overflow-hidden border-b border-gray-500/40">
         <img
           :src="imageSrc"
@@ -16,7 +15,6 @@
         />
       </div>
 
-      <!-- Conteúdo -->
       <div class="p-4">
         <h3
           class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -24,7 +22,6 @@
         </h3>
       </div>
 
-      <!-- FooterComponent -->
       <div class="px-4 pb-4">
         <span
           class="text-xs font-mono text-gray-300 flex items-center gap-1 transition-colors duration-200 group-hover:font-bold group-hover:text-sm"
@@ -41,20 +38,13 @@ import { computed } from 'vue'
 import { NCard } from 'naive-ui'
 import type { TopicDTO } from '@/types/interfaces/TopicDTO'
 
-// Props
 const props = defineProps<{ topic: TopicDTO }>()
 
-// Computed
 const truncatedTitle = computed(() => {
   return props.topic.title.length > 60
     ? props.topic.title.slice(0, 60) + '...'
     : props.topic.title
 })
 
-// Imagem estática
 const imageSrc = '/scylla.webp'
 </script>
-
-<style scoped>
-/* Apliquei gradiente e hover com Tailwind, nada adicional necessário */
-</style>

@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { NMessageProvider } from 'naive-ui'
+import { NMessageProvider, NModalProvider } from 'naive-ui'
 import NavbarComponent from '@/components/home/NavbarComponent.vue'
 import MenuComponent from '@/components/home/MenuComponent.vue'
 import FooterComponent from '@/components/home/FooterComponent.vue'

@@ -13,7 +13,6 @@
       </div>
     </div>
 
-    <!-- Background decorative elements -->
     <div class="bg-decoration">
       <div class="bg-circle bg-circle-top"></div>
       <div class="bg-circle bg-circle-bottom"></div>
@@ -41,7 +40,7 @@ import FormRegister from '@/components/auth/FormRegister.vue'
 
 .content-wrapper {
   width: 100%;
-  max-width: 42rem; /* max-w-2xl equivale a 42rem */
+  max-width: 42rem;
   position: relative;
   z-index: 10;
 }
@@ -57,13 +56,13 @@ import FormRegister from '@/components/auth/FormRegister.vue'
 
 .login-link {
   font-weight: 500;
-  color: #0d9488; /* text-teal-600 */
+  color: #0d9488;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .login-link:hover {
-  color: #14b8a6; /* text-teal-500 */
+  color: #14b8a6;
 }
 
 .bg-decoration {

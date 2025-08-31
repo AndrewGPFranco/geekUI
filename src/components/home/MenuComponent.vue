@@ -31,14 +31,10 @@
   </aside>
 </template>
 
-<script setup lang="ts">
-// Sem lógica complexa aqui, é só estrutura de menu
-</script>
-
 <style scoped>
 .menu {
   position: fixed;
-  top: 80px; /* ajuste se necessário para Navbar */
+  top: 80px;
   left: 0;
   width: 250px;
   height: calc(100vh - 80px);

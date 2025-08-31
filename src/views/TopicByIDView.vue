@@ -43,27 +43,19 @@ const fetchTopic = async (uuid: unknown) => {
   }
 }
 
-// Executar quando o componente for montado
 onMounted(() => {
   fetchTopic(tokenUUID)
 })
 
-// Reagir a mudanças no parâmetro UUID (caso mude na mesma página)
 watch(() => route.params.uuid, (newUUID) => {
   if (newUUID) {
-    topic.value = null // Limpar tópico anterior
+    topic.value = null
     fetchTopic(newUUID)
   }
-})
-
-// Definir nome do componente
-defineOptions({
-  name: 'TopicByUUIDPage'
 })
 </script>
 
 <style scoped>
-/* Adicione estilos personalizados se necessário */
 section {
   padding: 1rem;
 }
