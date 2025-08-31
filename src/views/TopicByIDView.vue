@@ -1,0 +1,74 @@
+<template>
+  <section>
+    <h1>
+      <div v-if="topic">
+        {{ topic }}
+      </div>
+      <div v-else>
+        <h1>Nada</h1>
+      </div>
+    </h1>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import TopicService from '@/services/TopicService'
+
+const route = useRoute()
+const topic = ref<unknown>(null)
+
+const tokenUUID = route.params.uuid
+
+const topicService = new TopicService()
+
+const fetchTopic = async (uuid: unknown) => {
+  if (!uuid) return
+
+  try {
+    const mapResult = await topicService.getTopicByID(uuid)
+
+    if (!mapResult.getError()) {
+      if (mapResult.getResponse() !== null) {
+        const response = mapResult.getResponse()
+
+        if (response && typeof response !== 'string' && 'title' in response) {
+          console.log(response); // todo ajustar
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao buscar tópico:', error)
+  }
+}
+
+// Executar quando o componente for montado
+onMounted(() => {
+  fetchTopic(tokenUUID)
+})
+
+// Reagir a mudanças no parâmetro UUID (caso mude na mesma página)
+watch(() => route.params.uuid, (newUUID) => {
+  if (newUUID) {
+    topic.value = null // Limpar tópico anterior
+    fetchTopic(newUUID)
+  }
+})
+
+// Definir nome do componente
+defineOptions({
+  name: 'TopicByUUIDPage'
+})
+</script>
+
+<style scoped>
+/* Adicione estilos personalizados se necessário */
+section {
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0;
+}
+</style>
