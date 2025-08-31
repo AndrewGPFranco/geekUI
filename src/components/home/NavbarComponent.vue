@@ -16,56 +16,74 @@
       </div>
 
       <div class="nav-actions">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="Buscar tópicos..."
-            v-model="search"
-            class="search-input"
-          />
-          <ul v-if="searchResults.length" class="search-results">
-            <li v-for="topic in searchResults" :key="topic.id">
-              {{ topic.title }}
-            </li>
-          </ul>
-          <p v-else-if="search">Nenhum resultado encontrado.</p>
-        </div>
+        <n-select
+          v-model:value="selectedTopic"
+          placeholder="Buscar por um tópico"
+          :options="optionsRef"
+          clearable
+          remote
+          filterable
+          label-field="label"
+          value-field="value"
+          @update:value="handleUpdateValue"
+          :on-search="debouncedSearch"
+        />
 
-        <span class="bell-icon">🔔</span>
+        <i class="pi pi-bell" style="font-size: 1.5em; cursor: pointer"></i>
       </div>
     </section>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { NSelect } from 'naive-ui'
+import { onUnmounted, ref } from 'vue'
 import debounce from 'lodash.debounce'
+import type { SelectOption } from 'naive-ui'
 import TopicService from '@/services/TopicService'
+import router from '@/router'
 
-const search = ref('')
-const searchResults = ref<Array<any>>([])
+const optionsRef = ref<SelectOption[]>([])
+const selectedTopic = ref<string | null>(null)
 
 const topicService = new TopicService()
 
-const debouncedSearch = debounce(async (query: string) => {
-  console.log("Oi")
-  // if (!query.trim()) {
-  //   searchResults.value = []
-  //   return
-  // }
-  // const response = await topicService.searchTopic(query)
-  // if (!response.getError()) {
-  //   searchResults.value = response.getResponse() || []
-  // } else {
-  //   searchResults.value = []
-  // }
-}, 1000)
+const handleSearch = async (query: string) => {
+  if (!query.trim()) {
+    optionsRef.value = []
+    return
+  }
+  try {
+    const response = await topicService.searchTopic(query)
+    if (!response.getError()) {
+      const data = response.getResponse() || []
+      optionsRef.value = Array.isArray(data)
+        ? data.map((input) => ({
+          label: input.title,
+          value: input.id
+        }))
+        : []
+    } else {
+      optionsRef.value = []
+    }
+  } catch (error) {
+    console.error('Error searching topics:', error)
+    optionsRef.value = []
+  }
+}
 
-watch(search, (newValue) => {
-  debouncedSearch(newValue)
+const debouncedSearch = debounce(handleSearch, 300)
+
+const handleUpdateValue = async (value: string) => {
+  if (value !== null)
+    await router.push("/topics/" + value)
+}
+
+onUnmounted(() => {
+  debouncedSearch.cancel()
 })
 </script>
+
 
 <style scoped>
 .navbar {
@@ -74,13 +92,14 @@ watch(search, (newValue) => {
   left: 0;
   width: 100%;
   height: 80px;
-  background-color: #1e2a46;
-  color: white;
+  color: black;
   display: flex;
   justify-content: space-between;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);;
   align-items: center;
   padding: 0 24px;
   z-index: 50;
+  border-bottom: 1px solid black;
 }
 
 .navbar-left .brand {
@@ -88,7 +107,7 @@ watch(search, (newValue) => {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: white;
+  color: black;
 }
 
 .logo {
@@ -115,56 +134,18 @@ watch(search, (newValue) => {
 
 .nav-links a {
   text-decoration: none;
-  color: white;
+  color: black;
   transition: color 0.2s;
 }
 
 .nav-links a:hover {
-  color: #cccccc;
+  color: #454545;
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 1px solid #444;
-  border-radius: 6px;
-  padding: 4px 8px;
-  background-color: #121b33;
-  color: white;
-}
-
-.search-input {
-  background: transparent;
-  border: none;
-  color: white;
-  outline: none;
-  width: 180px;
-}
-
-.search-icon {
-  margin-right: 4px;
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: #1e2a46;
-  border: 1px solid #444;
-  border-radius: 4px;
-  margin-top: 4px;
-  list-style: none;
-  padding: 4px 0;
-  max-height: 200px;
-  overflow-y: auto;
 }
 
 .search-results li {

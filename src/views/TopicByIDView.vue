@@ -34,7 +34,7 @@ const fetchTopic = async (uuid: unknown) => {
         const response = mapResult.getResponse()
 
         if (response && typeof response !== 'string' && 'title' in response) {
-          console.log(response); // todo ajustar
+          topic.value = response.title
         }
       }
     }

@@ -65,7 +65,7 @@ const message = useMessage()
 
 const hydrated = ref(false)
 const isLoggingOut = ref(false)
-const token = ref<boolean>(false);
+const token = ref<boolean>(false)
 
 const authService = new AuthService()
 
@@ -78,7 +78,7 @@ const handleLogout = async () => {
     isLoggingOut.value = true
     await authService.logout()
     message.success('Logout realizado com sucesso!')
-    await router.push('/')
+    await router.push('/auth/login')
   } catch (error) {
     message.error('Erro ao fazer logout')
     console.error('Logout error:', error)
@@ -89,19 +89,19 @@ const handleLogout = async () => {
 
 onMounted(() => {
   hydrated.value = true
-  token.value = localStorage.getItem('token') !== undefined;
+  token.value = localStorage.getItem('token') !== null
 })
 </script>
 
 <style scoped>
 .home-container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding-top: 80px;
+  width: 100%;
+  height: 100%;
 }
 
 .auth-buttons {

@@ -33,11 +33,9 @@ import FormLogin from '../components/auth/FormLogin.vue'
 <style scoped>
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 50%, #ecfeff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
   position: relative;
   overflow: hidden;
 }

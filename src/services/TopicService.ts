@@ -39,7 +39,7 @@ class TopicService {
     }
   }
 
-  async searchTopic(query: string): Promise<ResponseAPI<boolean, TopicDTO[] | string>> {
+  async searchTopic(query: string): Promise<ResponseAPI<boolean, TopicDTO[] | null>> {
     try {
       const token = this.getAuthToken()
       const result = await api.get(`/api/v1/topic/search?query=${query}`, {
@@ -50,7 +50,8 @@ class TopicService {
 
       return new ResponseAPI(false, result.data)
     } catch (error) {
-      return this.handleError(error, 'Ocorreu um erro ao buscar tópicos com essa pesquisa!')
+      console.error(error);
+      return new ResponseAPI(false, null)
     }
   }
 

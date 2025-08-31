@@ -18,7 +18,7 @@
         <span class="menu-text">App</span>
       </router-link>
 
-      <router-link to="/topic/all" class="menu-link">
+      <router-link to="/topics/all" class="menu-link">
         <span class="menu-icon">📖</span>
         <span class="menu-text">Tópicos</span>
       </router-link>
@@ -38,12 +38,12 @@
   left: 0;
   width: 250px;
   height: calc(100vh - 80px);
-  background: linear-gradient(to bottom, #121b33, #0f1626);
-  color: white;
+  color: black;
   padding: 24px 16px;
   border-right: 1px solid #444;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   z-index: 40;
 }
 
@@ -60,13 +60,13 @@
   padding: 8px 12px;
   border-radius: 8px;
   text-decoration: none;
-  color: white;
+  color: black;
   font-weight: 500;
   transition: background 0.2s;
 }
 
 .menu-link:hover {
-  background-color: #1f2a50;
+  background-color: #95a3cf;
 }
 
 .menu-icon {

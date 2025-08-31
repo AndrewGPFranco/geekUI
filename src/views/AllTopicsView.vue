@@ -11,14 +11,15 @@ import TopicList from '@/components/topics/TopicList.vue'
 
 <style scoped>
 .topic-all-container {
-  max-width: 80rem;
   margin: 0 auto;
+  width: 100%;
+  height: 100%;
   padding: 2rem 1.5rem;
 }
 
 .page-title {
   font-size: 1.875rem;
-  color: white;
+  color: black;
   font-weight: 700;
   margin-bottom: 1.5rem;
 }
