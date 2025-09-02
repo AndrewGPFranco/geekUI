@@ -36,6 +36,9 @@ class AuthService {
 
   async registrarUsuario(input: UserRegisterInput): Promise<ResponseAPI<boolean, string>> {
     try {
+      if (input.dataNascimentoTimestamp !== null)
+        input.dataNascimento = new Date(input.dataNascimentoTimestamp);
+
       const result = await api.post('/api/v1/user/register/first-step', input, {
         headers: { 'Content-Type': 'application/json' }
       })

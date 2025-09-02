@@ -1,52 +1,153 @@
 <template>
-  <section>
+  <section v-if="!uuidRegister">
     <n-form :rules="rules" :model="model">
       <n-grid :span="24" :x-gap="24">
         <n-form-item-gi :span="12" label="Nome" path="nameInput">
-          <n-input v-model="model.name" placeholder="Informe seu primeiro nome" type="text" />
+          <n-input v-model:value="model.nome" placeholder="Informe seu primeiro nome" type="text" />
         </n-form-item-gi>
 
         <n-form-item-gi :span="12" label="Nome Completo" path="fullNameInput">
-          <n-input v-model="model.fullName" placeholder="Digite seu nome completo" type="text" />
+          <n-input v-model:value="model.nomeCompleto" placeholder="Digite seu nome completo"
+                   type="text" />
         </n-form-item-gi>
 
         <n-form-item-gi :span="12" label="Email" path="emailInput">
-          <n-input v-model="model.email" placeholder="Informe seu email" type="text" />
+          <n-input v-model:value="model.email" placeholder="Informe seu email" type="text" />
         </n-form-item-gi>
 
         <n-form-item-gi :span="12" label="Senha" path="passwordInput">
-          <n-input v-model="model.password" placeholder="Digite sua senha" type="password" />
+          <n-input v-model:value="model.senha" placeholder="Digite sua senha" type="password" />
         </n-form-item-gi>
 
         <n-form-item-gi :span="12" label="Data de Nascimento" path="dateOfBirthInput">
-          <n-date-picker v-model="model.dateOfBirth" type="datetime" />
+          <n-date-picker
+            v-model:value="model.dataNascimentoTimestamp"
+            placeholder="Informe sua data de nascimento"
+            type="date"
+            style="width: 100%"
+          />
         </n-form-item-gi>
 
         <n-form-item-gi :span="12" label="Username" path="usernameInput">
-          <n-input v-model="model.username" placeholder="Digite um username" type="text" />
+          <n-input v-model:value="model.identificador" placeholder="Digite um username"
+                   type="text" />
         </n-form-item-gi>
 
         <n-form-item-gi :span="24" label="Cargos" path="rolesInput">
           <n-transfer
             style="width: 100%"
             :options="generalOptions"
-            v-model="model.roles"
+            v-model:value="model.roles"
           />
         </n-form-item-gi>
 
-        <n-form-item-gi>
-          <n-button type="primary">
+        <n-form-item-gi :span="24" style="text-align: center">
+          <n-button type="primary" @click="handleRegister">
             Cadastrar-se
           </n-button>
         </n-form-item-gi>
       </n-grid>
     </n-form>
   </section>
+
+  <section v-else
+           style="max-width: 400px; margin: auto; padding: 2rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+    <div style="text-align: center;">
+      <div
+        style="width: 64px; height: 64px; background: #DBEAFE; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+        <n-icon size="32" color="#2563EB">
+          <MailIcon />
+        </n-icon>
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: bold; color: #1F2937; margin-bottom: 0.5rem;">
+        Verificação de Email</h1>
+      <p style="color: #4B5563;">Digite o código de 6 dígitos enviado para seu email</p>
+    </div>
+
+    <n-input-otp
+      v-model:value="otp"
+      :length="6"
+      :disabled="isCodeExpired || isLoading"
+      style="justify-content: center;"
+    />
+
+    <div>
+      <div
+        :style="{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.5rem 1rem',
+        borderRadius: '9999px',
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        transition: 'all 0.2s',
+        background: timeLeft <= 60 ? '#FEE2E2' : timeLeft <= 300 ? '#FEF3C7' : '#DCFCE7',
+        color: timeLeft <= 60 ? '#B91C1C' : timeLeft <= 300 ? '#B45309' : '#166534',
+        animation: timeLeft <= 60 ? 'pulse 1s infinite' : 'none'
+      }"
+      >
+        <n-icon size="16">
+          <ClockIcon />
+        </n-icon>
+        <span>
+        {{ isCodeExpired ? 'Código Expirado' : `Tempo restante: ${formatTime(timeLeft)}` }}
+      </span>
+      </div>
+    </div>
+
+    <!-- Botão -->
+    <n-button
+      type="primary"
+      block
+      size="large"
+      :disabled="isCodeExpired || otp.length !== 6 || isLoading"
+      @click="validateCode"
+    >
+      <template v-if="isLoading">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <div
+            style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          Validando...
+        </div>
+      </template>
+      <template v-else>
+        {{ isCodeExpired ? 'Código Expirado' : 'Confirmar Código' }}
+      </template>
+    </n-button>
+
+  </section>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { NForm, NFormItemGi, NInput, NGrid, NDatePicker, NTransfer, NButton } from 'naive-ui'
+import {
+  NForm,
+  NFormItemGi,
+  NInput,
+  NGrid,
+  NDatePicker,
+  NTransfer,
+  NButton,
+  NInputOtp,
+  useMessage, type InputOtpOnUpdateValue
+} from 'naive-ui'
+import AuthService from '@/services/AuthService.ts'
+import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput.ts'
+import ValidationUtils from '@/utils/ValidationUtils.ts'
+import type ResponseAPI from '@/utils/ResponseAPI.ts'
+import router from '@/router'
+
+const toast = useMessage()
+const authService = new AuthService()
+const otp = ref<Array<string>>([])
+const uuidRegister = ref<string>('')
+const isCodeExpired = ref<boolean>(false)
+
+const onFocus = () => toast.info('focus')
+const onBlur = () => toast.info('blur')
+const onFinish = () => toast.info('finish')
+const onUpdateValue: InputOtpOnUpdateValue = value => toast.info(JSON.stringify(value))
 
 const generalOptions = [
   {
@@ -98,13 +199,94 @@ const rules = {
   }
 }
 
-const model = ref({
-  name: '',
+const model = ref<UserRegisterInput>({
+  nome: '',
   email: '',
-  password: '',
-  fullName: '',
+  senha: '',
+  nomeCompleto: '',
   roles: [],
-  username: '',
-  dateOfBirth: null
+  identificador: '',
+  dataNascimentoTimestamp: null,
+  dataNascimento: null
 })
+
+const handleRegister = async () => {
+  const mapValidation = ValidationUtils.validaInputRegistroUsuario(model.value)
+
+  if (mapValidation.get(true)) {
+    if (!ValidationUtils.validPasswordWithRegex(model.value.senha)) {
+      mapValidation.set(
+        false,
+        'A senha não esta de acordo com o padrão necessário!'
+      )
+    }
+  }
+
+  if (mapValidation.get(false)) {
+    if (verificaQuantidadeCamposInvalidos(mapValidation.get(false)))
+      toast.error(`Os campos: ${mapValidation.get(false)} estão inválidos!`)
+    else
+      toast.error(`O campo: ${mapValidation.get(false)} está inválido!`)
+
+    return
+  }
+
+  const result = await authService.registrarUsuario(model.value)
+
+  if (result.getError()) {
+    toast.error(result.getResponse() as string)
+    return
+  }
+
+  uuidRegister.value = result.getResponse() ?? ''
+}
+
+const verificaQuantidadeCamposInvalidos = (mensagem: string | undefined) => {
+  if (mensagem !== undefined) return mensagem.split(',').length > 1
+  return false
+}
+
+const validateCode = async () => {
+  if (isCodeExpired.value) {
+    toast.error('Código expirado! Solicite um novo código.')
+    return
+  }
+
+  if (otp.value.length !== 6) {
+    toast.error('É necessário informar os 6 dígitos!')
+    return
+  }
+
+  const code = otp.value.join('')
+
+  const result: ResponseAPI<boolean, string> = await authService.validateCode(
+    code,
+    uuidRegister.value
+  )
+
+  if (result.getError()) {
+    toast.error(result.getResponse() as string)
+    return
+  }
+
+  toast.success('Conta registrada com sucesso!')
+  await router.push('/auth/login')
+}
 </script>
+
+<style scoped>
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+</style>

@@ -20,7 +20,7 @@ class ValidationUtils {
 
     if (input.roles.length === 1 && input.roles[0] === '') camposInvalidos += ', tipo de perfil'
 
-    if (input.dataNascimento === undefined) camposInvalidos += ', data de nascimento'
+    if (input.dataNascimentoTimestamp === null) camposInvalidos += ', data de nascimento'
 
     const mensagemTratada: string = this.removeVirgulaInicial(camposInvalidos)
 

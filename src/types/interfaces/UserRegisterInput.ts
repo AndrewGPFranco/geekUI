@@ -5,5 +5,6 @@ export interface UserRegisterInput {
   nomeCompleto: string
   roles: Array<string>
   identificador: string
-  dataNascimento: Date | undefined
+  dataNascimentoTimestamp: number | null
+  dataNascimento: Date | null
 }
