@@ -42,7 +42,7 @@
         </n-form-item-gi>
 
         <n-form-item-gi :span="24" style="text-align: center">
-          <n-button type="primary" @click="handleRegister">
+          <n-button type="primary" :loading="isLoading" @click="handleRegister">
             Cadastrar-se
           </n-button>
         </n-form-item-gi>
@@ -56,7 +56,7 @@
       <div
         style="width: 64px; height: 64px; background: #DBEAFE; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
         <n-icon size="32" color="#2563EB">
-          <MailIcon />
+          <i class="pi pi-envelope" />
         </n-icon>
       </div>
       <h1 style="font-size: 1.5rem; font-weight: bold; color: #1F2937; margin-bottom: 0.5rem;">
@@ -82,45 +82,35 @@
         fontSize: '0.875rem',
         fontWeight: 500,
         transition: 'all 0.2s',
-        background: timeLeft <= 60 ? '#FEE2E2' : timeLeft <= 300 ? '#FEF3C7' : '#DCFCE7',
-        color: timeLeft <= 60 ? '#B91C1C' : timeLeft <= 300 ? '#B45309' : '#166534',
-        animation: timeLeft <= 60 ? 'pulse 1s infinite' : 'none'
+        backgroundColor: isCodeExpired ? '#FEE2E2' : '#EFF6FF',
+        color: isCodeExpired ? '#DC2626' : '#1D4ED8',
       }"
       >
-        <n-icon size="16">
-          <ClockIcon />
+        <n-icon size="16"><i class="pi pi-clock" />
         </n-icon>
         <span>
-        {{ isCodeExpired ? 'Código Expirado' : `Tempo restante: ${formatTime(timeLeft)}` }}
+        {{ isCodeExpired ? 'Código Expirado' : `Tempo restante: ${formatTime(timeRemaining)}` }}
       </span>
       </div>
     </div>
 
-    <!-- Botão -->
-    <n-button
-      type="primary"
-      block
-      size="large"
-      :disabled="isCodeExpired || otp.length !== 6 || isLoading"
-      @click="validateCode"
-    >
-      <template v-if="isLoading">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-          <div
-            style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-          Validando...
-        </div>
-      </template>
-      <template v-else>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+      <n-button
+        type="primary"
+        block
+        size="large"
+        :disabled="isCodeExpired || otp.length !== 6"
+        @click="validateCode"
+      >
         {{ isCodeExpired ? 'Código Expirado' : 'Confirmar Código' }}
-      </template>
-    </n-button>
+      </n-button>
+    </div>
 
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import {
   NForm,
   NFormItemGi,
@@ -130,7 +120,7 @@ import {
   NTransfer,
   NButton,
   NInputOtp,
-  useMessage, type InputOtpOnUpdateValue
+  useMessage
 } from 'naive-ui'
 import AuthService from '@/services/AuthService.ts'
 import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput.ts'
@@ -142,12 +132,10 @@ const toast = useMessage()
 const authService = new AuthService()
 const otp = ref<Array<string>>([])
 const uuidRegister = ref<string>('')
+let countdownInterval: number | null = null
+const timeRemaining = ref<number>(600)
+const isLoading = ref<boolean>(false)
 const isCodeExpired = ref<boolean>(false)
-
-const onFocus = () => toast.info('focus')
-const onBlur = () => toast.info('blur')
-const onFinish = () => toast.info('finish')
-const onUpdateValue: InputOtpOnUpdateValue = value => toast.info(JSON.stringify(value))
 
 const generalOptions = [
   {
@@ -210,7 +198,39 @@ const model = ref<UserRegisterInput>({
   dataNascimento: null
 })
 
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+const startCountdown = (): void => {
+  timeRemaining.value = 600
+  isCodeExpired.value = false
+
+  countdownInterval = setInterval(() => {
+    timeRemaining.value--
+
+    if (timeRemaining.value <= 0) {
+      isCodeExpired.value = true
+      if (countdownInterval) {
+        clearInterval(countdownInterval)
+        countdownInterval = null
+      }
+      toast.warning('O código de verificação expirou. Solicite um novo código.')
+    }
+  }, 1000)
+}
+
+const stopCountdown = (): void => {
+  if (countdownInterval) {
+    clearInterval(countdownInterval)
+    countdownInterval = null
+  }
+}
+
 const handleRegister = async () => {
+  isLoading.value = true
   const mapValidation = ValidationUtils.validaInputRegistroUsuario(model.value)
 
   if (mapValidation.get(true)) {
@@ -228,6 +248,7 @@ const handleRegister = async () => {
     else
       toast.error(`O campo: ${mapValidation.get(false)} está inválido!`)
 
+    isLoading.value = false
     return
   }
 
@@ -235,10 +256,13 @@ const handleRegister = async () => {
 
   if (result.getError()) {
     toast.error(result.getResponse() as string)
+    isLoading.value = false
     return
   }
 
+  isLoading.value = false
   uuidRegister.value = result.getResponse() ?? ''
+  startCountdown()
 }
 
 const verificaQuantidadeCamposInvalidos = (mensagem: string | undefined) => {
@@ -269,9 +293,14 @@ const validateCode = async () => {
     return
   }
 
+  stopCountdown()
   toast.success('Conta registrada com sucesso!')
   await router.push('/auth/login')
 }
+
+onUnmounted(() => {
+  stopCountdown()
+})
 </script>
 
 <style scoped>
