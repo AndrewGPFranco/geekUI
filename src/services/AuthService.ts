@@ -1,20 +1,26 @@
-import { AxiosError } from 'axios'
+import { AxiosError, type AxiosResponse } from 'axios'
 import { api } from '@/utils/AxiosInstance'
 import ResponseAPI from '@/utils/ResponseAPI'
 import { useAuthStore } from '@/stores/auth-store.ts'
 import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput'
+import { jwtDecode } from 'jwt-decode'
+import UserLogged from '@/types/class/UserLogged'
+import type { TokenPayload } from '@/types/interfaces/TokenPayload'
+import type { ResponseAxios } from '@/types/interfaces/ResponseAxios'
 
 class AuthService {
-  private authStore = useAuthStore() // instância da store Pinia
+  private readonly authStore = useAuthStore()
 
   async login(email: string, senha: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { email, password: senha }
-      const result = await api.post('/api/v1/user/login', input, {
+      const result: AxiosResponse<ResponseAxios> = await api.post('/api/v1/user/login', input, {
         headers: { 'Content-Type': 'application/json' },
       })
 
       this.authStore.setToken(result.data.response)
+
+      this.setUser(result.data.response)
 
       return new ResponseAPI(false, 'Login realizado com sucesso!')
     } catch (error) {
@@ -53,6 +59,8 @@ class AuthService {
 
   async logout(): Promise<void> {
     this.authStore.logout()
+    this.authStore.user = null
+    console.log(this.authStore.user)
   }
 
   async trocarSenha(novaSenha: string, uuid: string): Promise<ResponseAPI<boolean, string>> {
@@ -102,6 +110,20 @@ class AuthService {
         headers: { 'Content-Type': 'application/json' },
       })
       .then(() => console.log('Cache limpo!'))
+  }
+
+  setUser(result: string): void {
+    const tokenDecode: TokenPayload = jwtDecode(result)
+
+    this.authStore.user = new UserLogged(
+      tokenDecode.id,
+      tokenDecode.email,
+      tokenDecode.roles,
+      tokenDecode.sub,
+      tokenDecode.exp,
+    )
+
+    console.log(this.authStore.user)
   }
 }
 

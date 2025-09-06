@@ -10,7 +10,7 @@
       <div class="nav-links">
         <router-link to="/topics/all">TÓPICOS</router-link>
         <router-link to="/category">CATEGORIAS</router-link>
-        <router-link to="/profile">PERFIL</router-link>
+        <router-link to="/profile" v-if="isLogged">PERFIL</router-link>
         <router-link to="/app">APP</router-link>
       </div>
 
@@ -36,16 +36,20 @@
 
 <script setup lang="ts">
 import { NSelect } from 'naive-ui'
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import debounce from 'lodash.debounce'
 import type { SelectOption } from 'naive-ui'
 import TopicService from '@/services/TopicService'
 import router from '@/router'
+import { useAuthStore } from '@/stores/auth-store'
 
+const authStore = useAuthStore();
 const optionsRef = ref<SelectOption[]>([])
 const selectedTopic = ref<string | null>(null)
 
 const topicService = new TopicService()
+
+const isLogged = computed(() => authStore.isLogged);
 
 const handleSearch = async (query: string) => {
   if (!query.trim()) {

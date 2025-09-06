@@ -54,11 +54,10 @@
 </template>
 
 <script setup lang="ts">
-import { useMessage } from 'naive-ui'
-import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import AuthService from '@/services/AuthService'
-import { NButton, NSpace, NAlert } from 'naive-ui'
+import { NButton, NSpace, NAlert, useMessage } from 'naive-ui'
 
 const router = useRouter()
 const message = useMessage()

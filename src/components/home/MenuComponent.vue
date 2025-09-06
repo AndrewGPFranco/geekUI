@@ -6,7 +6,7 @@
         <span class="menu-text">Início</span>
       </router-link>
 
-      <router-link to="/profile" class="menu-link">
+      <router-link to="/profile" class="menu-link" v-if="isLogged">
         <span class="menu-icon">👤</span>
         <span class="menu-text">Perfil</span>
       </router-link>
@@ -30,6 +30,15 @@
     </nav>
   </aside>
 </template>
+
+<script lang="ts" setup>
+import { useAuthStore } from '@/stores/auth-store';
+import { computed } from 'vue';
+
+const authStore = useAuthStore();
+
+const isLogged = computed(() => authStore.isLogged);
+</script>
 
 <style scoped>
 .menu {
