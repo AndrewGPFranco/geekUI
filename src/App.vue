@@ -18,10 +18,35 @@
 </template>
 
 <script setup lang="ts">
+import AuthService from '@/services/AuthService.ts'
 import { NMessageProvider, NModalProvider } from 'naive-ui'
-import NavbarComponent from '@/components/home/NavbarComponent.vue'
 import MenuComponent from '@/components/home/MenuComponent.vue'
+import NavbarComponent from '@/components/home/NavbarComponent.vue'
 import FooterComponent from '@/components/home/FooterComponent.vue'
+import { onMounted } from 'vue'
+import router from '@/router'
+
+const authService = new AuthService()
+
+const updateUserLogged = async () => {
+  await authService.updateUserLogged()
+}
+
+const validToken = async () => {
+  const isValid = await authService.validToken()
+
+  if (isValid !== null) {
+    if (!isValid) {
+      await authService.logout()
+      await router.push({ name: 'login' })
+    }
+  }
+}
+
+onMounted(async () => {
+  await updateUserLogged()
+  await validToken()
+})
 </script>
 
 <style scoped>

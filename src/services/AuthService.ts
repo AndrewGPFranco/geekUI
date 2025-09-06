@@ -1,12 +1,12 @@
-import { AxiosError, type AxiosResponse } from 'axios'
+import { jwtDecode } from 'jwt-decode'
 import { api } from '@/utils/AxiosInstance'
 import ResponseAPI from '@/utils/ResponseAPI'
-import { useAuthStore } from '@/stores/auth-store.ts'
-import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput'
-import { jwtDecode } from 'jwt-decode'
 import UserLogged from '@/types/class/UserLogged'
+import { useAuthStore } from '@/stores/auth-store.ts'
+import { AxiosError, type AxiosResponse } from 'axios'
 import type { TokenPayload } from '@/types/interfaces/TokenPayload'
 import type { ResponseAxios } from '@/types/interfaces/ResponseAxios'
+import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput'
 
 class AuthService {
   private readonly authStore = useAuthStore()
@@ -15,7 +15,7 @@ class AuthService {
     try {
       const input = { email, password: senha }
       const result: AxiosResponse<ResponseAxios> = await api.post('/api/v1/user/login', input, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
 
       this.authStore.setToken(result.data.response)
@@ -49,7 +49,7 @@ class AuthService {
         input.dataNascimento = new Date(input.dataNascimentoTimestamp)
 
       const result = await api.post('/api/v1/user/register/first-step', input, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, result.data)
     } catch (error) {
@@ -60,14 +60,13 @@ class AuthService {
   async logout(): Promise<void> {
     this.authStore.logout()
     this.authStore.user = null
-    console.log(this.authStore.user)
   }
 
   async trocarSenha(novaSenha: string, uuid: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { newPassword: novaSenha, uuid }
       await api.post('/api/v1/user/forgot-password/change-password', input, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, 'Senha alterada com sucesso!')
     } catch (error) {
@@ -79,7 +78,7 @@ class AuthService {
     try {
       const input = { email }
       await api.post('/api/v1/user/forgot-password', input, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, `Link enviado para o email ${email}`)
     } catch (error) {
@@ -91,7 +90,7 @@ class AuthService {
     try {
       const input = { code: otp, uuid: uuidRegister, user: null }
       const response = await api.post('/api/v1/valid-code', input, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
 
       if (response.data === true) return new ResponseAPI(false, 'Conta cadastrada com sucesso!')
@@ -99,7 +98,7 @@ class AuthService {
     } catch (error) {
       return this.exibeMensagemDeErro(
         error,
-        'Ocorreu um erro ao cadastrar a conta, tente novamente!',
+        'Ocorreu um erro ao cadastrar a conta, tente novamente!'
       )
     }
   }
@@ -107,7 +106,7 @@ class AuthService {
   invalidateCode(uuidRegister: string): void {
     api
       .get(`/api/v1/invalidate-user-cache?token=${uuidRegister}`, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       })
       .then(() => console.log('Cache limpo!'))
   }
@@ -117,13 +116,40 @@ class AuthService {
 
     this.authStore.user = new UserLogged(
       tokenDecode.id,
+      result,
       tokenDecode.email,
       tokenDecode.roles,
       tokenDecode.sub,
-      tokenDecode.exp,
+      tokenDecode.exp
     )
+  }
 
-    console.log(this.authStore.user)
+  async validToken(): Promise<boolean | null> {
+    try {
+      const token: string | undefined = this.authStore.user?.token;
+
+      if(token === undefined) {
+        return null;
+      } else {
+        const result = await api.get(`/api/v1/valid-token/${token}`, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        return result.data;
+      }
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  async updateUserLogged(): Promise<void> {
+    const token: string | null = localStorage.getItem('token');
+
+    if (token !== null)
+      this.setUser(token);
+    else
+      this.authStore.user = null;
   }
 }
 

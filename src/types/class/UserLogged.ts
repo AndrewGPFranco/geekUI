@@ -1,5 +1,6 @@
 class UserLogged {
   id: string
+  token: string
   email: string
   roles: string[]
   username: string
@@ -7,12 +8,14 @@ class UserLogged {
 
   constructor(
     id: string,
+    token: string,
     email: string,
     roles: string[],
     username: string,
     tokenExpiredAt: number,
   ) {
     this.id = id
+    this.token = token
     this.email = email
     this.roles = roles
     this.username = username
