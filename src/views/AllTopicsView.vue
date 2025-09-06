@@ -11,9 +11,9 @@ import TopicList from '@/components/topics/TopicList.vue'
 
 <style scoped>
 .topic-all-container {
-  margin: 0 auto;
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 2rem 1.5rem;
 }
 
@@ -22,6 +22,7 @@ import TopicList from '@/components/topics/TopicList.vue'
   color: black;
   font-weight: 700;
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {

@@ -243,13 +243,10 @@
 
 .footer-bottom {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-}
-
-.footer-copy {
   font-size: 0.875rem;
   color: #64748b;
   font-weight: 500;
