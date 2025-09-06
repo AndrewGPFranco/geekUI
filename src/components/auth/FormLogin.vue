@@ -177,7 +177,6 @@ const handleLogin = async () => {
   gap: 1.5rem;
 }
 
-/* Estilização personalizada dos inputs */
 .custom-input :deep(.n-input__input-el) {
   height: 3rem;
   font-size: 1rem;

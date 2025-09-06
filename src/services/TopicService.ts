@@ -10,13 +10,7 @@ class TopicService {
 
   async getAllTopics(): Promise<ResponseAPI<boolean, TopicDTO[] | string>> {
     try {
-      const token = this.getAuthToken()
-      const result = await api.get('/api/v1/topic/all?pageSize=10&pageNumber=0', {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const result = await api.get('/open/v1/topic/all?pageSize=10&pageNumber=0')
 
       return new ResponseAPI(false, result.data)
     } catch (error) {
@@ -26,12 +20,7 @@ class TopicService {
 
   async getTopicByID(id: unknown): Promise<ResponseAPI<boolean, TopicDTO | string>> {
     try {
-      const token = this.getAuthToken()
-      const result = await api.get(`/api/v1/topic/by-id?id=${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const result = await api.get(`/open/v1/topic/by-id?id=${id}`)
 
       return new ResponseAPI(false, result.data)
     } catch (error) {
@@ -41,16 +30,11 @@ class TopicService {
 
   async searchTopic(query: string): Promise<ResponseAPI<boolean, TopicDTO[] | null>> {
     try {
-      const token = this.getAuthToken()
-      const result = await api.get(`/api/v1/topic/search?query=${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const result = await api.get(`/open/v1/topic/search?query=${query}`)
 
       return new ResponseAPI(false, result.data)
     } catch (error) {
-      console.error(error);
+      console.error(error)
       return new ResponseAPI(false, null)
     }
   }

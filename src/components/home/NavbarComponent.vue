@@ -1,9 +1,8 @@
 <template>
-  <nav class="navbar">
+  <nav>
     <div class="navbar-left">
       <router-link to="/" class="brand">
         <img src="/logo.png" alt="Logo do site" class="logo" />
-        <span class="brand-title">Geek | Community</span>
       </router-link>
     </div>
 
@@ -86,16 +85,16 @@ onUnmounted(() => {
 
 
 <style scoped>
-.navbar {
+nav {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 80px;
+  height: 100px;
   color: black;
   display: flex;
   justify-content: space-between;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   align-items: center;
   padding: 0 24px;
   z-index: 50;
@@ -111,13 +110,8 @@ onUnmounted(() => {
 }
 
 .logo {
-  width: 56px;
-  height: 56px;
-}
-
-.brand-title {
-  font-size: 18px;
-  font-weight: 500;
+  width: 100%;
+  height: 80px;
 }
 
 .navbar-right {

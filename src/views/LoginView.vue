@@ -17,11 +17,6 @@
         </n-text>
       </div>
     </div>
-
-    <div class="bg-decoration">
-      <div class="bg-circle bg-circle-top"></div>
-      <div class="bg-circle bg-circle-bottom"></div>
-    </div>
   </div>
 </template>
 
@@ -86,43 +81,9 @@ import FormLogin from '../components/auth/FormLogin.vue'
   color: #1d4ed8;
 }
 
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.bg-circle {
-  position: absolute;
-  width: 20rem;
-  height: 20rem;
-  border-radius: 50%;
-  filter: blur(3rem);
-  opacity: 0.6;
-}
-
-.bg-circle-top {
-  top: -10rem;
-  right: -8rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
-}
-
-.bg-circle-bottom {
-  bottom: -10rem;
-  left: -8rem;
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);
-}
-
-/* Responsividade */
 @media (max-width: 640px) {
   .title {
     font-size: 1.5rem;
-  }
-
-  .bg-circle {
-    width: 16rem;
-    height: 16rem;
   }
 }
 </style>

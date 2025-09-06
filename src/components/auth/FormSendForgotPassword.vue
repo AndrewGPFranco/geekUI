@@ -27,6 +27,7 @@
                 :status="emailStatus"
                 class="custom-input"
                 @input="validateEmail"
+                @keyup="handleSubmit"
               />
             </n-form-item>
 
@@ -140,7 +141,7 @@ const handleSubmit = async () => {
 .title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: white;
+  color: black;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
