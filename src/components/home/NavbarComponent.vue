@@ -11,7 +11,6 @@
         <router-link to="/topics/all">TÓPICOS</router-link>
         <router-link to="/category">CATEGORIAS</router-link>
         <router-link to="/profile" v-if="isLogged">PERFIL</router-link>
-        <router-link to="/app">APP</router-link>
       </div>
 
       <div class="nav-actions">

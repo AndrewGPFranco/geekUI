@@ -13,11 +13,6 @@
 
       <hr class="menu-divider" />
 
-      <router-link to="/" class="menu-link">
-        <span class="menu-icon">⚛️</span>
-        <span class="menu-text">App</span>
-      </router-link>
-
       <router-link to="/topics/all" class="menu-link">
         <span class="menu-icon">📖</span>
         <span class="menu-text">Tópicos</span>
