@@ -14,7 +14,7 @@ class AuthService {
   async login(email: string, senha: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { email, password: senha }
-      const result: AxiosResponse<ResponseAxios> = await api.post('/open/v1/user/login', input, {
+      const result: AxiosResponse<ResponseAxios> = await api.post('/open/v1/auth/login', input, {
         headers: { 'Content-Type': 'application/json' }
       })
 
@@ -48,7 +48,7 @@ class AuthService {
       if (input.dataNascimentoTimestamp !== null)
         input.dataNascimento = new Date(input.dataNascimentoTimestamp)
 
-      const result = await api.post('/open/v1/user/register/first-step', input, {
+      const result = await api.post('/open/v1/auth/register/first-step', input, {
         headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, result.data)
@@ -65,7 +65,7 @@ class AuthService {
   async trocarSenha(novaSenha: string, uuid: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { newPassword: novaSenha, uuid }
-      await api.post('/open/v1/user/forgot-password/change-password', input, {
+      await api.post('/open/v1/auth/forgot-password/change-password', input, {
         headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, 'Senha alterada com sucesso!')
@@ -77,7 +77,7 @@ class AuthService {
   async solicitarLinkParaNovaSenha(email: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { email }
-      await api.post('/open/v1/user/forgot-password', input, {
+      await api.post('/open/v1/auth/forgot-password', input, {
         headers: { 'Content-Type': 'application/json' }
       })
       return new ResponseAPI(false, `Link enviado para o email ${email}`)
@@ -89,7 +89,7 @@ class AuthService {
   async validateCode(otp: string, uuidRegister: string): Promise<ResponseAPI<boolean, string>> {
     try {
       const input = { code: otp, uuid: uuidRegister, user: null }
-      const response = await api.post('/open/v1/valid-code', input, {
+      const response = await api.post('/open/v1/auth/valid-code', input, {
         headers: { 'Content-Type': 'application/json' }
       })
 
@@ -105,7 +105,7 @@ class AuthService {
 
   invalidateCode(uuidRegister: string): void {
     api
-      .get(`/open/v1/invalidate-user-cache?token=${uuidRegister}`, {
+      .get(`/open/v1/auth/invalidate-user-cache?token=${uuidRegister}`, {
         headers: { 'Content-Type': 'application/json' }
       })
       .then(() => console.log('Cache limpo!'))
@@ -131,7 +131,7 @@ class AuthService {
       if(token === undefined) {
         return null;
       } else {
-        const result = await api.get(`/open/v1/valid-token/${token}`, {
+        const result = await api.get(`/open/v1/auth/valid-token/${token}`, {
           headers: { 'Content-Type': 'application/json' }
         })
 
