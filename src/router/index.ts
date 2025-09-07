@@ -44,6 +44,12 @@ const router = createRouter({
       component: () => import('../views/TopicByIDView.vue'),
       path: '/topics/:uuid',
       meta: { title: 'Tópico' }
+    },
+    {
+      name: 'profile',
+      component: () => import('../views/ProfileView.vue'),
+      path: '/profile',
+      meta: { title: 'Perfil' }
     }
   ]
 })

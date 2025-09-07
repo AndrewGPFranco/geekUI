@@ -115,7 +115,7 @@ nav {
 
 .logo {
   width: 100%;
-  height: 80px;
+  height: 60px;
 }
 
 .navbar-right {
@@ -153,10 +153,5 @@ nav {
 
 .search-results li:hover {
   background: #2a3b6f;
-}
-
-.bell-icon {
-  cursor: pointer;
-  font-size: 20px;
 }
 </style>

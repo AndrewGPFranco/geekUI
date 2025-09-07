@@ -30,7 +30,7 @@
           size="large"
           :disabled="isLoading"
           class="custom-input"
-          @keyup="handleLogin"
+          @keydown.enter="handleLogin"
         >
           <template #suffix>
             <n-button
