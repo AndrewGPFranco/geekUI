@@ -3,7 +3,7 @@
     <div class="stat-card">
       <div class="stat-content">
         <i class="pi pi-file-edit stat-icon"></i>
-        <div class="stat-value">{{ 222 }}</div>
+        <div class="stat-value">{{ 0 }}</div>
         <div class="stat-label">Posts Publicados</div>
       </div>
     </div>
@@ -11,7 +11,7 @@
     <div class="stat-card">
       <div class="stat-content">
         <i class="pi pi-users stat-icon"></i>
-        <div class="stat-value">{{ 222 }}</div>
+        <div class="stat-value">{{ 0 }}</div>
         <div class="stat-label">Seguidores</div>
       </div>
     </div>
@@ -19,7 +19,7 @@
     <div class="stat-card">
       <div class="stat-content">
         <i class="pi pi-star-fill stat-icon"></i>
-        <div class="stat-value">{{ 222 }}</div>
+        <div class="stat-value">{{ 0 }}</div>
         <div class="stat-label">Reviews Escritas</div>
       </div>
     </div>
@@ -27,7 +27,7 @@
     <div class="stat-card">
       <div class="stat-content">
         <i class="pi pi-trophy stat-icon"></i>
-        <div class="stat-value">{{ 222 }}</div>
+        <div class="stat-value">{{ 0 }}</div>
         <div class="stat-label">Conquistas</div>
       </div>
     </div>
