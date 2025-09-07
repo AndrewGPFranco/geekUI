@@ -24,7 +24,61 @@
 
         <div class="container-user-info">
           <h1 class="username">{{ user?.username }}</h1>
-          <p class="user-description">Criador da comunidade geek!</p>
+          <div class="container-description">
+            <div v-if="!isEditDescription" class="description-display">
+              <p class="user-description">{{ user?.description }}</p>
+              <button
+                @click="showInputDescription"
+                class="edit-description-btn"
+                title="Editar descrição"
+              >
+                <i class="pi pi-pen-to-square"></i>
+              </button>
+            </div>
+
+            <div v-else class="description-edit-container">
+              <div class="input-wrapper">
+                <n-input
+                  ref="descriptionInput"
+                  v-model:value="description"
+                  type="textarea"
+                  :autosize="{ minRows: 1, maxRows: 3 }"
+                  :maxlength="200"
+                  placeholder="Defina sua nova descrição..."
+                  @keyup.enter.ctrl="changeDescription"
+                  @keyup.escape="cancelEdit"
+                />
+                <div class="char-count">
+                  {{ description.length }}/200
+                </div>
+              </div>
+              <div class="action-buttons">
+                <n-button
+                  @click="changeDescription"
+                  type="primary"
+                  size="small"
+                  :loading="isLoading"
+                  :disabled="!description.trim() || description.length > 200"
+                >
+                  <template #icon>
+                    <i class="pi pi-check"></i>
+                  </template>
+                  Salvar
+                </n-button>
+                <n-button
+                  @click="cancelEdit"
+                  quaternary
+                  size="small"
+                  :disabled="isLoading"
+                >
+                  <template #icon>
+                    <i class="pi pi-times"></i>
+                  </template>
+                  Cancelar
+                </n-button>
+              </div>
+            </div>
+          </div>
           <div class="user-info">
             <div class="info-item">
               <i class="pi pi-calendar"></i>
@@ -36,7 +90,7 @@
             </div>
             <div class="info-item">
               <i class="pi pi-tag"></i>
-              <span>{{ user?.roles[0] }}</span>
+              <span>{{ user?.role }}</span>
             </div>
           </div>
         </div>
@@ -46,11 +100,63 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth-store.ts'
+import { ref, nextTick, onMounted } from 'vue'
+import { NInput, NButton, useMessage } from 'naive-ui'
+import UserService from '@/services/UserService.ts'
+import type { InfosUser } from '@/types/interfaces/InfosUser.ts'
 
-const authStore = useAuthStore()
+const toast = useMessage()
+const descriptionInput = ref()
+const userService = new UserService()
+const isLoading = ref<boolean>(false)
+const user = ref<InfosUser | null>(null)
+const isEditDescription = ref<boolean>(false)
 
-const user = authStore.user
+const description = ref<string>('')
+
+const showInputDescription = async () => {
+  isEditDescription.value = true
+
+  await nextTick()
+  descriptionInput.value?.focus()
+}
+
+const cancelEdit = () => {
+  description.value = ''
+  isEditDescription.value = false
+}
+
+const changeDescription = async () => {
+  if (!description.value.trim() || description.value.length > 200) {
+    toast.warning('Por favor, insira uma descrição válida (1-200 caracteres)')
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    const responseAPI = await userService.changeDescription(description.value.trim())
+
+    if (responseAPI.getError()) {
+      toast.error(String(responseAPI.getResponse()))
+      return
+    }
+
+    description.value = ''
+    isEditDescription.value = false
+    user.value = (await userService.getInfosUser()).getResponse()
+    toast.success('Descrição atualizada com sucesso!')
+  } catch (error) {
+    console.error(error)
+    toast.error('Erro ao atualizar descrição')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  user.value = (await userService.getInfosUser()).getResponse()
+})
 </script>
 
 <style scoped>
@@ -173,19 +279,98 @@ const user = authStore.user
   padding-top: 0.5rem;
 }
 
+.container-description {
+  margin-bottom: 1rem;
+}
+
+.description-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-description {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
+  flex: 1;
+}
+
+.edit-description-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.edit-description-btn:hover {
+  opacity: 1;
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.description-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper :deep(.n-input) {
+  border-radius: 12px;
+}
+
+.input-wrapper :deep(.n-input__textarea-el) {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  padding: 0.75rem;
+  resize: none;
+}
+
+.char-count {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.action-buttons :deep(.n-button) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
 .username {
   font-size: 2rem;
   font-weight: 700;
   color: #111827;
   margin: 0 0 0.5rem 0;
   letter-spacing: -0.025em;
-}
-
-.user-description {
-  font-size: 1.125rem;
-  color: #6b7280;
-  margin: 0 0 1rem 0;
-  font-weight: 400;
 }
 
 .user-info {
@@ -248,6 +433,21 @@ const user = authStore.user
 
   .user-info {
     justify-content: center;
+  }
+
+  .description-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons :deep(.n-button) {
+    width: 100%;
   }
 }
 
