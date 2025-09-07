@@ -50,6 +50,12 @@ const router = createRouter({
       component: () => import('../views/ProfileView.vue'),
       path: '/profile',
       meta: { title: 'Perfil' }
+    },
+    {
+      name: 'write-topic',
+      component: () => import('../views/TopicWriting.vue'),
+      path: '/write-topic',
+      meta: { title: 'Escreva um tópico' }
     }
   ]
 })

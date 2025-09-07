@@ -18,6 +18,13 @@
         <span class="menu-text">Tópicos</span>
       </router-link>
 
+      <router-link :to="{name: 'write-topic'}" class="menu-link" v-if="isWriter">
+        <span class="menu-icon">
+          <i class="pi pi-pencil" />
+        </span>
+        <span class="menu-text">Escrever Tópico</span>
+      </router-link>
+
       <router-link to="/category" class="menu-link">
         <span class="menu-icon">🗂️</span>
         <span class="menu-text">Categorias</span>
@@ -28,9 +35,13 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/auth-store';
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const authStore = useAuthStore();
+
+const isWriter = computed(() =>
+  !!authStore.user?.roles?.includes("Escritor")
+);
 
 const isLogged = computed(() => authStore.isLogged);
 </script>
