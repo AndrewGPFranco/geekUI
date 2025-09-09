@@ -1,6 +1,7 @@
+import './main.css'
+import { marked } from 'marked'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import './main.css'
 
 import App from './App.vue'
 import router from './router'
@@ -13,3 +14,8 @@ app.use(pinia)
 app.use(router)
 
 app.mount('#app')
+
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+})

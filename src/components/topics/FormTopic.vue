@@ -38,38 +38,6 @@
                 </option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label for="tags">Tags</label>
-              <div class="tag-input-container">
-                <input
-                  id="tags"
-                  v-model="tagInput"
-                  type="text"
-                  placeholder="Adicionar tag..."
-                  class="form-input tag-input"
-                  @keyup.enter="handleTagKeyPress"
-                />
-                <button
-                  type="button"
-                  class="btn btn-outline btn-sm"
-                  @click="addTag"
-                >
-                  <i class="pi pi-tag" />
-                </button>
-              </div>
-
-              <div class="tags-display" v-if="formData.tags.length > 0">
-                <span
-                  v-for="tag in formData.tags"
-                  :key="tag"
-                  class="tag-badge"
-                  @click="removeTag(tag)"
-                >
-                  {{ tag }} ×
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </aside>
@@ -117,12 +85,13 @@
           <div class="card-content editor-content">
             <div
               v-if="isPreview"
-              class="preview-area"
-              v-html="renderMarkdown(formData.content)"
+              class="preview-area markdown-preview"
+              v-html="renderedMarkdown"
             />
 
             <textarea
               v-else
+              ref="textareaRef"
               v-model="formData.content"
               class="content-editor"
               placeholder="Comece a escrever seu artigo aqui... Use markdown para formatação!"
@@ -136,26 +105,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { marked } from 'marked'
+import { useMessage } from 'naive-ui'
+import TopicService from '@/services/TopicService.ts'
+import { computed, onMounted, reactive, ref } from 'vue'
+import type { FormData } from '@/types/interfaces/topics/FormData.ts'
+import type { Category } from '@/types/interfaces/topics/Category.ts'
+import type { MarkdownTool } from '@/types/interfaces/topics/MarkdownTool.ts'
+import type { ItensTopicDTO } from '@/types/interfaces/topics/ItensTopicDTO.ts'
+import ResponseAPI from '@/utils/ResponseAPI.ts'
 
-interface FormData {
-  title: string
-  category: string
-  tags: string[]
-  content: string
-}
-
-interface Category {
-  value: string
-  label: string
-}
-
-interface MarkdownTool {
-  name: string
-  title: string
-  icon: string
-  placeholder?: string
-}
+const toast = useMessage()
+const topicService = new TopicService()
 
 const emit = defineEmits<{
   change: [data: FormData]
@@ -165,51 +126,62 @@ const emit = defineEmits<{
 const formData = reactive<FormData>({
   title: '',
   category: '',
-  tags: [],
   content: ''
 })
 
 const isPreview = ref(false)
-const tagInput = ref('')
 const categories = ref<Category[]>([])
+const textareaRef = ref<HTMLTextAreaElement>()
+
+const renderedMarkdown = computed(() => {
+  if (!formData.content.trim()) {
+    return '<p class="empty-content">Nenhum conteúdo para visualizar...</p>'
+  }
+
+  try {
+    return marked(formData.content)
+  } catch (error) {
+    console.error('Erro ao renderizar markdown:', error)
+    return '<p class="error-content">Erro ao renderizar o markdown</p>'
+  }
+})
 
 const markdownTools: MarkdownTool[] = [
-  { name: 'bold', title: 'Negrito', icon: 'pi pi-code', placeholder: 'texto em negrito' },
-  { name: 'italic', title: 'Itálico', icon: 'pi pi-code', placeholder: 'texto em itálico' },
-  { name: 'h1', title: 'Título Principal', icon: 'pi pi-code', placeholder: 'Título Principal' },
-  { name: 'h2', title: 'Subtítulo', icon: 'pi pi-code', placeholder: 'Subtítulo' },
-  { name: 'h3', title: 'Seção', icon: 'pi pi-code', placeholder: 'Seção' },
-  { name: 'ul', title: 'Lista', icon: 'pi pi-code', placeholder: 'item da lista' },
-  { name: 'ol', title: 'Lista Numerada', icon: 'pi pi-code', placeholder: 'item numerado' },
-  { name: 'link', title: 'Link', icon: 'pi pi-code', placeholder: 'texto do link' },
-  { name: 'image', title: 'Imagem', icon: 'pi pi-code', placeholder: 'descrição da imagem' },
-  { name: 'code', title: 'Código', icon: 'pi pi-code', placeholder: 'código' },
-  { name: 'quote', title: 'Citação', icon: 'pi pi-code', placeholder: 'citação' }
+  {
+    name: 'bold',
+    title: 'Negrito (Ctrl+B)',
+    icon: 'fa-solid fa-bold',
+    placeholder: 'texto em negrito'
+  },
+  {
+    name: 'italic',
+    title: 'Itálico (Ctrl+I)',
+    icon: 'fa-solid fa-italic',
+    placeholder: 'texto em itálico'
+  },
+  {
+    name: 'h1',
+    title: 'Título Principal',
+    icon: 'fa-solid fa-heading',
+    placeholder: 'Título Principal'
+  },
+  { name: 'h2', title: 'Subtítulo', icon: 'fa-solid fa-heading', placeholder: 'Subtítulo' },
+  { name: 'h3', title: 'Seção', icon: 'fa-solid fa-heading', placeholder: 'Seção' },
+  { name: 'ul', title: 'Lista', icon: 'fa-solid fa-list-ul', placeholder: 'item da lista' },
+  {
+    name: 'ol',
+    title: 'Lista Numerada',
+    icon: 'fa-solid fa-list-ol',
+    placeholder: 'item numerado'
+  },
+  { name: 'link', title: 'Link', icon: 'fa-solid fa-link', placeholder: 'texto do link' },
+  { name: 'image', title: 'Imagem', icon: 'fa-solid fa-image', placeholder: 'descrição da imagem' },
+  { name: 'code', title: 'Código', icon: 'fa-solid fa-code', placeholder: 'código' },
+  { name: 'quote', title: 'Citação', icon: 'fa-solid fa-quote-left', placeholder: 'citação' }
 ]
 
 const handleChange = () => {
   emit('change', { ...formData })
-}
-
-const handleTagKeyPress = (event: KeyboardEvent) => {
-  if (event.key === 'Enter') {
-    event.preventDefault()
-    addTag()
-  }
-}
-
-const addTag = () => {
-  const tag = tagInput.value.trim()
-  if (tag && !formData.tags.includes(tag)) {
-    formData.tags.push(tag)
-    tagInput.value = ''
-    handleChange()
-  }
-}
-
-const removeTag = (tagToRemove: string) => {
-  formData.tags = formData.tags.filter(tag => tag !== tagToRemove)
-  handleChange()
 }
 
 const setPreview = (preview: boolean) => {
@@ -217,7 +189,7 @@ const setPreview = (preview: boolean) => {
 }
 
 const insertMarkdown = (type: string, placeholder?: string) => {
-  const textarea = document.querySelector('.content-editor') as HTMLTextAreaElement
+  const textarea = textareaRef.value
   if (!textarea) return
 
   const start = textarea.selectionStart
@@ -226,61 +198,83 @@ const insertMarkdown = (type: string, placeholder?: string) => {
   const text = selectedText || placeholder || ''
 
   let markdownText = ''
+  let cursorOffset = 0
 
   switch (type) {
     case 'bold':
       markdownText = `**${text}**`
+      cursorOffset = selectedText ? 0 : -2
       break
     case 'italic':
       markdownText = `*${text}*`
+      cursorOffset = selectedText ? 0 : -1
       break
     case 'h1':
       markdownText = `# ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
     case 'h2':
       markdownText = `## ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
     case 'h3':
       markdownText = `### ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
     case 'ul':
       markdownText = `- ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
     case 'ol':
       markdownText = `1. ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
     case 'link':
       markdownText = `[${text || 'texto do link'}](url)`
+      cursorOffset = selectedText ? -5 : -4
       break
     case 'image':
       markdownText = `![${text || 'alt text'}](url)`
+      cursorOffset = selectedText ? -5 : -4
       break
     case 'code':
       markdownText = `\`${text}\``
+      cursorOffset = selectedText ? 0 : -1
       break
     case 'quote':
       markdownText = `> ${text}`
+      cursorOffset = selectedText ? 0 : 0
       break
   }
 
   formData.content = formData.content.substring(0, start) + markdownText + formData.content.substring(end)
-  handleChange()
-}
 
-const renderMarkdown = (content: string): string => {
-  return content.replace(/\n/g, '<br>')
+  setTimeout(() => {
+    const newPosition = start + markdownText.length + cursorOffset
+    textarea.setSelectionRange(newPosition, newPosition)
+    textarea.focus()
+  })
+
+  handleChange()
 }
 
 const loadCategories = async () => {
   try {
-    categories.value = [
-      { value: 'anime', label: 'Anime' },
-      { value: 'manga', label: 'Mangá' },
-      { value: 'jogos', label: 'Jogos' },
-      { value: 'noticias', label: 'Notícias' },
-      { value: 'reviews', label: 'Reviews' },
-      { value: 'listas', label: 'Listas' }
-    ]
+    const responseAPI: ResponseAPI<boolean, ItensTopicDTO | string> = await topicService.getItensToFormTopic()
+
+    if (responseAPI.getError()) {
+      toast.error(responseAPI.getResponse() as string)
+      return
+    }
+
+    const response = responseAPI.getResponse()
+
+    if (typeof response !== 'string') {
+      categories.value = (response?.tags ?? []).map((item: string) => ({
+        label: item,
+        value: item
+      })) as Category[]
+    }
   } catch (error) {
     console.error('Erro ao carregar categorias:', error)
   }
@@ -296,7 +290,6 @@ defineExpose({
     Object.assign(formData, {
       title: '',
       category: '',
-      tags: [],
       content: ''
     })
   }
@@ -373,36 +366,6 @@ defineExpose({
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.tag-input-container {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.tag-input {
-  flex: 1;
-}
-
-.tags-display {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
-}
-
-.tag-badge {
-  background: #f3f4f6;
-  color: #374151;
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.tag-badge:hover {
-  background: #e5e7eb;
-}
-
 .editor-card {
   height: 100%;
   display: flex;
@@ -433,6 +396,13 @@ defineExpose({
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
+  color: #6b7280;
+}
+
+.tab-button.active {
+  background: white;
+  color: #374151;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .markdown-toolbar {
@@ -487,6 +457,98 @@ defineExpose({
   min-height: 500px;
   font-size: 0.875rem;
   line-height: 1.6;
+}
+
+/* Estilos para o preview markdown */
+.markdown-preview :deep(h1) {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1.5rem 0 1rem 0;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-preview :deep(h2) {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1.25rem 0 0.75rem 0;
+}
+
+.markdown-preview :deep(h3) {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.markdown-preview :deep(p) {
+  margin: 0.75rem 0;
+}
+
+.markdown-preview :deep(ul),
+.markdown-preview :deep(ol) {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-preview :deep(li) {
+  margin: 0.25rem 0;
+}
+
+.markdown-preview :deep(blockquote) {
+  border-left: 4px solid #3b82f6;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  background: #f8fafc;
+  font-style: italic;
+}
+
+.markdown-preview :deep(code) {
+  background: #f1f5f9;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.markdown-preview :deep(pre) {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.markdown-preview :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+
+.markdown-preview :deep(a) {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.markdown-preview :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+  margin: 1rem 0;
+}
+
+.markdown-preview .empty-content {
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.markdown-preview .error-content {
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #fecaca;
 }
 
 .btn {

@@ -1,9 +1,13 @@
 import { AxiosError } from 'axios'
 import { api } from '@/utils/AxiosInstance'
 import ResponseAPI from '@/utils/ResponseAPI'
+import { useAuthStore } from '@/stores/auth-store.ts'
 import type { TopicDTO } from '@/types/interfaces/TopicDTO'
+import type { ItensTopicDTO } from '@/types/interfaces/topics/ItensTopicDTO.ts'
 
 class TopicService {
+  private readonly authStore = useAuthStore()
+
   private getAuthToken(): string | null {
     return localStorage.getItem('token')
   }
@@ -52,6 +56,24 @@ class TopicService {
   private extractErrorMessage(error: AxiosError): string {
     const data = error.response?.data as { error?: string; response?: string }
     return data?.error ?? data?.response ?? 'Erro inesperado'
+  }
+
+  async getItensToFormTopic(): Promise<ResponseAPI<boolean, ItensTopicDTO | string>> {
+    try {
+      const token: string | undefined = this.authStore.user?.token
+
+      const result = await api.get(`/api/v1/itens-topic`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      return new ResponseAPI(false, result.data)
+    } catch (error) {
+      console.error(error)
+      return new ResponseAPI(false, "Erro ao obter as tags disponíveis")
+    }
   }
 }
 

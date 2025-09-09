@@ -197,7 +197,7 @@ defineExpose({
 
 .main-content {
   flex: 1;
-  padding: 2rem 1.5rem;
+  padding: 1rem;
   background-color: #fefefe;
   max-width: 100%;
   overflow-x: hidden;
