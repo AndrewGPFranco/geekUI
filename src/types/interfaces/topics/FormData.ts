@@ -1,7 +1,7 @@
 interface FormData {
   title: string
-  category: string
-  content: string
+  tags: Array<string>
+  description: string
 }
 
 export type { FormData }

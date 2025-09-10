@@ -8,77 +8,45 @@
 
       <div class="navbar-actions">
         <button
-          class="btn btn-secondary"
-          @click="handleDrafts"
-          :disabled="isLoading"
-          title="Ver rascunhos salvos"
-        >
-          <i class="pi pi-pencil" />
-          <span>Rascunhos</span>
-        </button>
-
-        <button
           class="btn btn-primary"
+          :disabled="isBlocksButton"
           @click="handleSave"
-          :disabled="isLoading || !hasChanges"
-          :class="{ 'btn-loading': isLoading }"
           title="Salvar artigo atual"
         >
-          <i class="pi pi-spin pi-spinner" v-if="isLoading" />
+          <i class="pi pi-spin" v-if="isBlocksButton" />
           <i class="pi pi-save" v-else />
-          <span>{{ isLoading ? 'Salvando...' : 'Salvar' }}</span>
+          <span>Salvar</span>
         </button>
       </div>
     </nav>
 
     <main class="main-content">
-      <FormTopic @change="handleFormChange" />
+      <FormTopic @change="handleChanges" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import TopicService from '@/services/TopicService.ts'
 import FormTopic from '@/components/topics/FormTopic.vue'
+import type { FormData } from '@/types/interfaces/topics/FormData.ts'
 
-const isLoading = ref(false)
-const hasChanges = ref(false)
-
-const emit = defineEmits<{
-  save: []
-  drafts: []
-  change: [hasChanges: boolean]
-}>()
+const topicService = new TopicService();
+const isBlocksButton = ref<boolean>(true)
 
 const handleSave = async () => {
-  if (isLoading.value || !hasChanges.value) return
-
-  try {
-    isLoading.value = true
-    emit('save')
-    hasChanges.value = false
-  } catch (error) {
-    console.error('Erro ao salvar:', error)
-  } finally {
-    isLoading.value = false
-  }
+  const resultAPI = await topicService.createNewTopic(data.value)
+  console.log(resultAPI.getResponse());
 }
 
-const handleDrafts = () => {
-  if (!isLoading.value) {
-    emit('drafts')
-  }
-}
+const data = ref<FormData>();
 
-const handleFormChange = () => {
-  hasChanges.value = true
-  emit('change', true)
+const handleChanges = async (formData: FormData) => {
+  if (!formData.title || !formData.description || formData.tags.length < 1) return;
+  isBlocksButton.value = false;
+  data.value = formData;
 }
-
-defineExpose({
-  save: handleSave,
-  resetChanges: () => hasChanges.value = false
-})
 </script>
 
 <style scoped>
@@ -151,20 +119,6 @@ defineExpose({
   opacity: 0.6;
 }
 
-.btn-secondary {
-  background-color: #fff;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #f9fafb;
-  color: #374151;
-  border-color: #9ca3af;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 .btn-primary {
   background-color: #059669;
   color: white;
@@ -176,14 +130,6 @@ defineExpose({
   border-color: #047857;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-}
-
-.btn-loading {
-  position: relative;
-}
-
-.btn-loading i.pi-spinner {
-  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {

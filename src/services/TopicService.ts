@@ -4,15 +4,13 @@ import ResponseAPI from '@/utils/ResponseAPI'
 import { useAuthStore } from '@/stores/auth-store.ts'
 import type { TopicDTO } from '@/types/interfaces/TopicDTO'
 import type { ItensTopicDTO } from '@/types/interfaces/topics/ItensTopicDTO.ts'
+import type { FormData } from '@/types/interfaces/topics/FormData.ts'
+import type { Ref } from 'vue'
 
 class TopicService {
   private readonly authStore = useAuthStore()
 
-  private getAuthToken(): string | null {
-    return localStorage.getItem('token')
-  }
-
-  async getAllTopics(): Promise<ResponseAPI<boolean, TopicDTO[] | string>> {
+  async getAllTopics(): Promise<ResponseAPI<TopicDTO[] | string>> {
     try {
       const result = await api.get('/open/v1/topic/all?pageSize=10&pageNumber=0')
 
@@ -22,7 +20,7 @@ class TopicService {
     }
   }
 
-  async getTopicByID(id: unknown): Promise<ResponseAPI<boolean, TopicDTO | string>> {
+  async getTopicByID(id: unknown): Promise<ResponseAPI<TopicDTO | string>> {
     try {
       const result = await api.get(`/open/v1/topic/by-id?id=${id}`)
 
@@ -32,7 +30,7 @@ class TopicService {
     }
   }
 
-  async searchTopic(query: string): Promise<ResponseAPI<boolean, TopicDTO[] | null>> {
+  async searchTopic(query: string): Promise<ResponseAPI<TopicDTO[] | null>> {
     try {
       const result = await api.get(`/open/v1/topic/search?query=${query}`)
 
@@ -43,7 +41,7 @@ class TopicService {
     }
   }
 
-  private handleError(error: unknown, defaultMsg: string): ResponseAPI<boolean, string> {
+  private handleError(error: unknown, defaultMsg: string): ResponseAPI<string> {
     if (
       error instanceof AxiosError &&
       (error.response?.data?.error || error.response?.data?.response)
@@ -58,7 +56,7 @@ class TopicService {
     return data?.error ?? data?.response ?? 'Erro inesperado'
   }
 
-  async getItensToFormTopic(): Promise<ResponseAPI<boolean, ItensTopicDTO | string>> {
+  async getItensToFormTopic(): Promise<ResponseAPI<ItensTopicDTO | string>> {
     try {
       const token: string | undefined = this.authStore.user?.token
 
@@ -72,7 +70,28 @@ class TopicService {
       return new ResponseAPI(false, result.data)
     } catch (error) {
       console.error(error)
-      return new ResponseAPI(false, "Erro ao obter as tags disponíveis")
+      return new ResponseAPI(false, 'Erro ao obter as tags disponíveis')
+    }
+  }
+
+  async createNewTopic(topic: FormData | undefined): Promise<ResponseAPI<string>> {
+    try {
+      if (topic === undefined) throw Error();
+
+      const token: string | undefined = this.authStore.user?.token
+
+      console.log(topic);
+      const result = await api.post(`/api/v1/topic`, topic, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      return new ResponseAPI(false, result.data)
+    } catch (error) {
+      console.error(error)
+      return new ResponseAPI(false, 'Erro ao publicar o conteúdo!')
     }
   }
 }

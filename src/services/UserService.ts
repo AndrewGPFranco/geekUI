@@ -11,7 +11,7 @@ class UserService {
     return resposta?.error ?? resposta?.response ?? 'Erro inesperado'
   }
 
-  exibeMensagemDeErro(error: unknown, mensagemComum: string): ResponseAPI<boolean, string> {
+  exibeMensagemDeErro(error: unknown, mensagemComum: string): ResponseAPI<string> {
     if (
       error instanceof AxiosError &&
       (error.response?.data?.error || error.response?.data?.response)
@@ -21,11 +21,11 @@ class UserService {
     return new ResponseAPI(true, mensagemComum)
   }
 
-  async changeDescription(description: string): Promise<ResponseAPI<boolean, string>> {
+  async changeDescription(description: string): Promise<ResponseAPI<string>> {
     try {
       const token = this.authStore.user?.token
 
-      const response = await api.post('/api/v1/user/change-description', {description: description}, {
+      const response = await api.post('/api/v1/user/change-description', { description: description }, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

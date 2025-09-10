@@ -22,21 +22,7 @@
 
             <div class="form-group">
               <label for="category">Categoria</label>
-              <select
-                id="category"
-                v-model="formData.category"
-                class="form-select"
-                @change="handleChange"
-              >
-                <option value="">Selecione uma categoria</option>
-                <option
-                  v-for="category in categories"
-                  :key="category.value"
-                  :value="category.value"
-                >
-                  {{ category.label }}
-                </option>
-              </select>
+              <n-select v-model:value="formData.tags" multiple :options="options" placeholder="Adicionar tags" />
             </div>
           </div>
         </div>
@@ -92,7 +78,7 @@
             <textarea
               v-else
               ref="textareaRef"
-              v-model="formData.content"
+              v-model="formData.description"
               class="content-editor"
               placeholder="Comece a escrever seu artigo aqui... Use markdown para formatação!"
               @input="handleChange"
@@ -106,40 +92,36 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
-import { useMessage } from 'naive-ui'
+import { useMessage, NSelect } from 'naive-ui'
+import ResponseAPI from '@/utils/ResponseAPI.ts'
 import TopicService from '@/services/TopicService.ts'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { FormData } from '@/types/interfaces/topics/FormData.ts'
 import type { Category } from '@/types/interfaces/topics/Category.ts'
 import type { MarkdownTool } from '@/types/interfaces/topics/MarkdownTool.ts'
 import type { ItensTopicDTO } from '@/types/interfaces/topics/ItensTopicDTO.ts'
-import ResponseAPI from '@/utils/ResponseAPI.ts'
 
 const toast = useMessage()
 const topicService = new TopicService()
 
-const emit = defineEmits<{
-  change: [data: FormData]
-  save: [data: FormData]
-}>()
+const emit = defineEmits(['change'])
 
 const formData = reactive<FormData>({
   title: '',
-  category: '',
-  content: ''
+  tags: [],
+  description: ''
 })
 
-const isPreview = ref(false)
-const categories = ref<Category[]>([])
+const options = ref<Category[]>([])
+const isPreview = ref<boolean>(false)
 const textareaRef = ref<HTMLTextAreaElement>()
 
 const renderedMarkdown = computed(() => {
-  if (!formData.content.trim()) {
+  if (!formData.description.trim())
     return '<p class="empty-content">Nenhum conteúdo para visualizar...</p>'
-  }
 
   try {
-    return marked(formData.content)
+    return marked(formData.description)
   } catch (error) {
     console.error('Erro ao renderizar markdown:', error)
     return '<p class="error-content">Erro ao renderizar o markdown</p>'
@@ -181,7 +163,7 @@ const markdownTools: MarkdownTool[] = [
 ]
 
 const handleChange = () => {
-  emit('change', { ...formData })
+  emit('change', formData)
 }
 
 const setPreview = (preview: boolean) => {
@@ -194,7 +176,7 @@ const insertMarkdown = (type: string, placeholder?: string) => {
 
   const start = textarea.selectionStart
   const end = textarea.selectionEnd
-  const selectedText = formData.content.substring(start, end)
+  const selectedText = formData.description.substring(start, end)
   const text = selectedText || placeholder || ''
 
   let markdownText = ''
@@ -247,7 +229,7 @@ const insertMarkdown = (type: string, placeholder?: string) => {
       break
   }
 
-  formData.content = formData.content.substring(0, start) + markdownText + formData.content.substring(end)
+  formData.description = formData.description.substring(0, start) + markdownText + formData.description.substring(end)
 
   setTimeout(() => {
     const newPosition = start + markdownText.length + cursorOffset
@@ -260,21 +242,19 @@ const insertMarkdown = (type: string, placeholder?: string) => {
 
 const loadCategories = async () => {
   try {
-    const responseAPI: ResponseAPI<boolean, ItensTopicDTO | string> = await topicService.getItensToFormTopic()
+    const responseAPI: ResponseAPI<ItensTopicDTO | string> = await topicService.getItensToFormTopic()
 
     if (responseAPI.getError()) {
       toast.error(responseAPI.getResponse() as string)
       return
     }
 
-    const response = responseAPI.getResponse()
+    const response = responseAPI.getResponse() as ItensTopicDTO
 
-    if (typeof response !== 'string') {
-      categories.value = (response?.tags ?? []).map((item: string) => ({
-        label: item,
-        value: item
-      })) as Category[]
-    }
+    options.value = (response.tags).map((item: string) => ({
+      label: item,
+      value: item
+    })) as Category[]
   } catch (error) {
     console.error('Erro ao carregar categorias:', error)
   }
@@ -282,17 +262,6 @@ const loadCategories = async () => {
 
 onMounted(() => {
   loadCategories()
-})
-
-defineExpose({
-  getFormData: () => formData,
-  resetForm: () => {
-    Object.assign(formData, {
-      title: '',
-      category: '',
-      content: ''
-    })
-  }
 })
 </script>
 
@@ -459,7 +428,6 @@ defineExpose({
   line-height: 1.6;
 }
 
-/* Estilos para o preview markdown */
 .markdown-preview :deep(h1) {
   font-size: 2rem;
   font-weight: bold;
@@ -549,33 +517,5 @@ defineExpose({
   padding: 1rem;
   border-radius: 0.375rem;
   border: 1px solid #fecaca;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-outline {
-  background: white;
-  border-color: #d1d5db;
-  color: #374151;
-}
-
-.btn-outline:hover {
-  background: #f9fafb;
-}
-
-.btn-sm {
-  padding: 0.375rem 0.5rem;
-  font-size: 0.75rem;
 }
 </style>

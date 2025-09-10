@@ -4,13 +4,14 @@
  *
  * @author andrewgo
  */
-class ResponseAPI<ERROR, RESPONSE> {
+class ResponseAPI<RESPONSE> {
   constructor(
-    public error: ERROR | null,
-    public response: RESPONSE | null,
-  ) {}
+    public error: boolean,
+    public response: RESPONSE | null
+  ) {
+  }
 
-  getError(): ERROR | null {
+  getError(): boolean {
     return this.error
   }
 

@@ -11,7 +11,7 @@ import type { UserRegisterInput } from '@/types/interfaces/UserRegisterInput'
 class AuthService {
   private readonly authStore = useAuthStore()
 
-  async login(email: string, senha: string): Promise<ResponseAPI<boolean, string>> {
+  async login(email: string, senha: string): Promise<ResponseAPI<string>> {
     try {
       const input = { email, password: senha }
       const result: AxiosResponse<ResponseAxios> = await api.post('/open/v1/auth/login', input, {
@@ -33,7 +33,7 @@ class AuthService {
     return resposta?.error ?? resposta?.response ?? 'Erro inesperado'
   }
 
-  exibeMensagemDeErro(error: unknown, mensagemComum: string): ResponseAPI<boolean, string> {
+  exibeMensagemDeErro(error: unknown, mensagemComum: string): ResponseAPI<string> {
     if (
       error instanceof AxiosError &&
       (error.response?.data?.error || error.response?.data?.response)
@@ -43,7 +43,7 @@ class AuthService {
     return new ResponseAPI(true, mensagemComum)
   }
 
-  async registrarUsuario(input: UserRegisterInput): Promise<ResponseAPI<boolean, string>> {
+  async registrarUsuario(input: UserRegisterInput): Promise<ResponseAPI<string>> {
     try {
       if (input.dataNascimentoTimestamp !== null)
         input.dataNascimento = new Date(input.dataNascimentoTimestamp)
@@ -62,7 +62,7 @@ class AuthService {
     this.authStore.user = null
   }
 
-  async trocarSenha(novaSenha: string, uuid: string): Promise<ResponseAPI<boolean, string>> {
+  async trocarSenha(novaSenha: string, uuid: string): Promise<ResponseAPI<string>> {
     try {
       const input = { newPassword: novaSenha, uuid }
       await api.post('/open/v1/auth/forgot-password/change-password', input, {
@@ -74,7 +74,7 @@ class AuthService {
     }
   }
 
-  async solicitarLinkParaNovaSenha(email: string): Promise<ResponseAPI<boolean, string>> {
+  async solicitarLinkParaNovaSenha(email: string): Promise<ResponseAPI<string>> {
     try {
       const input = { email }
       await api.post('/open/v1/auth/forgot-password', input, {
@@ -86,7 +86,7 @@ class AuthService {
     }
   }
 
-  async validateCode(otp: string, uuidRegister: string): Promise<ResponseAPI<boolean, string>> {
+  async validateCode(otp: string, uuidRegister: string): Promise<ResponseAPI<string>> {
     try {
       const input = { code: otp, uuid: uuidRegister, user: null }
       const response = await api.post('/open/v1/auth/valid-code', input, {
@@ -126,30 +126,30 @@ class AuthService {
 
   async validToken(): Promise<boolean | null> {
     try {
-      const token: string | undefined = this.authStore.user?.token;
+      const token: string | undefined = this.authStore.user?.token
 
-      if(token === undefined) {
-        return null;
+      if (token === undefined) {
+        return null
       } else {
         const result = await api.get(`/open/v1/auth/valid-token/${token}`, {
           headers: { 'Content-Type': 'application/json' }
         })
 
-        return result.data;
+        return result.data
       }
     } catch (error) {
-      console.error(error);
-      return false;
+      console.error(error)
+      return false
     }
   }
 
   async updateUserLogged(): Promise<void> {
-    const token: string | null = localStorage.getItem('token');
+    const token: string | null = localStorage.getItem('token')
 
     if (token !== null)
-      this.setUser(token);
+      this.setUser(token)
     else
-      this.authStore.user = null;
+      this.authStore.user = null
   }
 }
 
