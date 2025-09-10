@@ -5,7 +5,6 @@ import { useAuthStore } from '@/stores/auth-store.ts'
 import type { TopicDTO } from '@/types/interfaces/TopicDTO'
 import type { ItensTopicDTO } from '@/types/interfaces/topics/ItensTopicDTO.ts'
 import type { FormData } from '@/types/interfaces/topics/FormData.ts'
-import type { Ref } from 'vue'
 
 class TopicService {
   private readonly authStore = useAuthStore()
@@ -76,11 +75,11 @@ class TopicService {
 
   async createNewTopic(topic: FormData | undefined): Promise<ResponseAPI<string>> {
     try {
-      if (topic === undefined) throw Error();
+      if (topic === undefined)
+        return new ResponseAPI(true, "É necessário preencher todos os campos!");
 
       const token: string | undefined = this.authStore.user?.token
 
-      console.log(topic);
       const result = await api.post(`/api/v1/topic`, topic, {
         headers: {
           'Content-Type': 'application/json',

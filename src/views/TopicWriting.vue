@@ -21,31 +21,41 @@
     </nav>
 
     <main class="main-content">
-      <FormTopic @change="handleChanges" />
+      <FormTopic @change="handleChanges" :isCleanForm="isCleanForm" />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useMessage } from 'naive-ui'
 import TopicService from '@/services/TopicService.ts'
 import FormTopic from '@/components/topics/FormTopic.vue'
 import type { FormData } from '@/types/interfaces/topics/FormData.ts'
 
-const topicService = new TopicService();
+const toast = useMessage()
+const topicService = new TopicService()
+const isCleanForm = ref<boolean>(false);
 const isBlocksButton = ref<boolean>(true)
 
 const handleSave = async () => {
   const resultAPI = await topicService.createNewTopic(data.value)
-  console.log(resultAPI.getResponse());
+
+  if (resultAPI.getError()) {
+    toast.error(resultAPI.getResponse() as string)
+    return
+  }
+
+  isCleanForm.value = true;
+  toast.success(resultAPI.getResponse() as string)
 }
 
-const data = ref<FormData>();
+const data = ref<FormData>()
 
 const handleChanges = async (formData: FormData) => {
-  if (!formData.title || !formData.description || formData.tags.length < 1) return;
-  isBlocksButton.value = false;
-  data.value = formData;
+  if (!formData.title || !formData.description || formData.tags.length < 1) return
+  isBlocksButton.value = false
+  data.value = formData
 }
 </script>
 

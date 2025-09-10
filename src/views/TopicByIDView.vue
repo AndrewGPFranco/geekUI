@@ -2,7 +2,7 @@
   <section>
     <h1>
       <div v-if="topic">
-        {{ topic }}
+        {{ topic.description }}
       </div>
       <div v-else>
         <h1>Nada</h1>
@@ -15,9 +15,10 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import TopicService from '@/services/TopicService'
+import type { TopicDTO } from '@/types/interfaces/TopicDTO.ts'
 
 const route = useRoute()
-const topic = ref<unknown>(null)
+const topic = ref<TopicDTO | null>(null)
 
 const tokenUUID = route.params.uuid
 
@@ -33,9 +34,8 @@ const fetchTopic = async (uuid: unknown) => {
       if (mapResult.getResponse() !== null) {
         const response = mapResult.getResponse()
 
-        if (response && typeof response !== 'string' && 'title' in response) {
-          topic.value = response.title
-        }
+        if (response && typeof response !== 'string' && 'title' in response)
+          topic.value = response
       }
     }
   } catch (error) {
@@ -57,7 +57,10 @@ watch(() => route.params.uuid, (newUUID) => {
 
 <style scoped>
 section {
-  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
 }
 
 h1 {

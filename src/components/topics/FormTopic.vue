@@ -22,7 +22,8 @@
 
             <div class="form-group">
               <label for="category">Categoria</label>
-              <n-select v-model:value="formData.tags" multiple :options="options" placeholder="Adicionar tags" />
+              <n-select v-model:value="formData.tags" multiple :options="options"
+                        placeholder="Adicionar tags" />
             </div>
           </div>
         </div>
@@ -95,7 +96,7 @@ import { marked } from 'marked'
 import { useMessage, NSelect } from 'naive-ui'
 import ResponseAPI from '@/utils/ResponseAPI.ts'
 import TopicService from '@/services/TopicService.ts'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { FormData } from '@/types/interfaces/topics/FormData.ts'
 import type { Category } from '@/types/interfaces/topics/Category.ts'
 import type { MarkdownTool } from '@/types/interfaces/topics/MarkdownTool.ts'
@@ -105,6 +106,12 @@ const toast = useMessage()
 const topicService = new TopicService()
 
 const emit = defineEmits(['change'])
+const props = defineProps({
+  isCleanForm: {
+    type: Boolean,
+    required: true
+  }
+})
 
 const formData = reactive<FormData>({
   title: '',
@@ -262,6 +269,12 @@ const loadCategories = async () => {
 
 onMounted(() => {
   loadCategories()
+})
+
+watch(() => props.isCleanForm, () => {
+  formData.title = ''
+  formData.description = ''
+  formData.tags = []
 })
 </script>
 
