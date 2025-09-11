@@ -3,7 +3,7 @@
     <div class="stat-card">
       <div class="stat-content">
         <i class="pi pi-file-edit stat-icon"></i>
-        <div class="stat-value">{{ 0 }}</div>
+        <div class="stat-value">{{ postsPublished }}</div>
         <div class="stat-label">Posts Publicados</div>
       </div>
     </div>
@@ -33,6 +33,18 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import TopicService from '@/services/TopicService.ts'
+import { onMounted, ref } from 'vue'
+
+const topicService = new TopicService()
+const postsPublished = ref<number | null>(0);
+
+onMounted(async () => {
+  postsPublished.value = (await topicService.getAmountTopicsWrittenByUser()).getResponse()
+})
+</script>
 
 <style scoped>
 .stats-grid {

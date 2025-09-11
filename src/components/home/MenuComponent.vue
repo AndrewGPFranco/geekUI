@@ -1,20 +1,26 @@
 <template>
   <aside class="menu">
     <nav class="menu-nav">
-      <router-link to="/" class="menu-link">
-        <span class="menu-icon">🏠</span>
+      <router-link :to="{name: 'home'}" class="menu-link">
+        <span class="menu-icon">
+          <i class="fa-solid fa-house"></i>
+        </span>
         <span class="menu-text">Início</span>
       </router-link>
 
-      <router-link to="/profile" class="menu-link" v-if="isLogged">
-        <span class="menu-icon">👤</span>
+      <router-link :to="{name: 'profile'}" class="menu-link" v-if="isLogged">
+        <span class="menu-icon">
+          <i class="fa-solid fa-user"></i>
+        </span>
         <span class="menu-text">Perfil</span>
       </router-link>
 
       <hr class="menu-divider" />
 
-      <router-link to="/topics/all" class="menu-link">
-        <span class="menu-icon">📖</span>
+      <router-link :to="{name: 'all-topics'}" class="menu-link">
+        <span class="menu-icon">
+          <i class="fa-solid fa-book-open"></i>
+        </span>
         <span class="menu-text">Tópicos</span>
       </router-link>
 
@@ -25,8 +31,10 @@
         <span class="menu-text">Escrever Tópico</span>
       </router-link>
 
-      <router-link to="/category" class="menu-link">
-        <span class="menu-icon">🗂️</span>
+      <router-link :to="{name: 'categories'}" class="menu-link">
+        <span class="menu-icon">
+          <i class="fa-solid fa-list"></i>
+        </span>
         <span class="menu-text">Categorias</span>
       </router-link>
     </nav>
@@ -34,16 +42,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthStore } from '@/stores/auth-store'
 import { computed } from 'vue'
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 const isWriter = computed(() =>
-  !!authStore.user?.roles?.includes("Escritor")
-);
+  !!authStore.user?.roles?.includes('Escritor')
+)
 
-const isLogged = computed(() => authStore.isLogged);
+const isLogged = computed(() => authStore.isLogged)
 </script>
 
 <style scoped>

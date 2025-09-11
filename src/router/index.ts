@@ -56,6 +56,12 @@ const router = createRouter({
       component: () => import('../views/TopicWriting.vue'),
       path: '/write-topic',
       meta: { title: 'Escreva um tópico' }
+    },
+    {
+      name: 'categories',
+      component: () => import('../views/TopicWriting.vue'),
+      path: '/categories',
+      meta: { title: 'Categorias dos Posts' }
     }
   ]
 })

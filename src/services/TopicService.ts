@@ -76,7 +76,7 @@ class TopicService {
   async createNewTopic(topic: FormData | undefined): Promise<ResponseAPI<string>> {
     try {
       if (topic === undefined)
-        return new ResponseAPI(true, "É necessário preencher todos os campos!");
+        return new ResponseAPI(true, 'É necessário preencher todos os campos!');
 
       const token: string | undefined = this.authStore.user?.token
 
@@ -91,6 +91,24 @@ class TopicService {
     } catch (error) {
       console.error(error)
       return new ResponseAPI(false, 'Erro ao publicar o conteúdo!')
+    }
+  }
+
+  async getAmountTopicsWrittenByUser(): Promise<ResponseAPI<number>> {
+    try {
+      const token: string | undefined = this.authStore.user?.token
+
+      const result = await api.get(`/api/v1/amount-topic-written`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      return new ResponseAPI(false, result.data)
+    } catch (error) {
+      console.error(error)
+      return new ResponseAPI(false, 0)
     }
   }
 }
