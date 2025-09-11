@@ -45,7 +45,7 @@
               <span class="comment-user">{{ comment.username }}</span>
               <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
             </div>
-            <p class="comment-text">{{ comment.text }}</p>
+            <p class="comment-text">{{ comment.message }}</p>
           </div>
         </div>
 
@@ -70,7 +70,6 @@ import TopicService from '@/services/TopicService'
 import { ref, onMounted, watch, computed } from 'vue'
 import type { TopicDTO } from '@/types/interfaces/TopicDTO.ts'
 
-// Configuração do marked para melhor renderização
 marked.setOptions({
   breaks: true,
   gfm: true
