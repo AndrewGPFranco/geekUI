@@ -23,7 +23,7 @@
             <div class="form-group">
               <label for="category">Categoria</label>
               <n-select v-model:value="formData.tags" multiple :options="options"
-                        placeholder="Adicionar tags" />
+                        placeholder="Adicionar tags" @change="handleChange" />
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@ import { marked } from 'marked'
 import { useMessage, NSelect } from 'naive-ui'
 import ResponseAPI from '@/utils/ResponseAPI.ts'
 import TopicService from '@/services/TopicService.ts'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import type { FormData } from '@/types/interfaces/topics/FormData.ts'
 import type { Category } from '@/types/interfaces/topics/Category.ts'
 import type { MarkdownTool } from '@/types/interfaces/topics/MarkdownTool.ts'
@@ -169,7 +169,8 @@ const markdownTools: MarkdownTool[] = [
   { name: 'quote', title: 'Citação', icon: 'fa-solid fa-quote-left', placeholder: 'citação' }
 ]
 
-const handleChange = () => {
+const handleChange = async () => {
+  await nextTick()
   emit('change', formData)
 }
 
