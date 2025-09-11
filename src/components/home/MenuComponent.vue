@@ -26,7 +26,7 @@
 
       <router-link :to="{name: 'write-topic'}" class="menu-link" v-if="isWriter">
         <span class="menu-icon">
-          <i class="pi pi-pencil" />
+          <i class="fa-solid fa-pencil"></i>
         </span>
         <span class="menu-text">Escrever Tópico</span>
       </router-link>
